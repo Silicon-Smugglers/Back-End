@@ -19,6 +19,47 @@ drug_ref = db.collection('drugs')
 # def get_current_time():
 #     return {'time': time.time()}
 
+all_drugs = {}
+
+@app.route('/test', methods=['GET'])
+def test():
+    print(next(drug_ref.list_documents()).id)
+
+    return jsonify({"success": True}), 200
+
+@app.route('/compare', methods=['GET'])
+def compare():
+    """
+        compare() : Given a list of drug_ids, check all interactions with other drugs within the list.
+        Output ->
+    """
+    drug_ls = ['Hq6TB7KrkqF2ezXXRlrw', 'IdgTjrNPKVftpEnN1fSO',
+               's9D1I7JvKXVA8n8P1BUC', 'fy8pUCzK9uybjP5xJokm',
+               'jL1hQWqqAzzss6jV6dPl', 'lCNKpmGQCWNzB9XI533b',
+               'lYMiJ1e7qN19km0KXvIX', 'tgO3zwJq7AcMaAn1JPay']
+    
+    interactions = []
+
+    try:
+        all_drugs = {doc.id: doc.to_dict() for doc in drug_ref.stream()}
+    except Exception as e:
+        return f"An Error Occurred: {e}"
+    
+    print(all_drugs)
+
+    # go through all chosen drugs
+    for i in range(len(drug_ls)-1):
+        # go through all interactions for that drug
+        for interaction in all_drugs[drug_ls[i]]['interactions']:
+            # go through all remaining drugs to check for interactions
+            for j in range(i+1, len(drug_ls)-1):
+                if all_drugs[drug_ls[j]]['name'].lower() in interaction['name'].lower():
+                    interactions.append(f'{all_drugs[drug_ls[i]]["name"]} and {all_drugs[drug_ls[j]]["name"]} ({interaction["severity"].upper()}) : {interaction["effect"]}')
+    return interactions
+    # return jsonify({"success": True}), 200
+
+
+
 
 @app.route('/add', methods=['GET'])
 def create():
