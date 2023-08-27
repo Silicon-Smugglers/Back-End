@@ -27,16 +27,17 @@ def test():
 
     return jsonify({"success": True}), 200
 
-@app.route('/compare', methods=['GET'])
+@app.route('/compare', methods=['POST'])
 def compare():
     """
         compare() : Given a list of drug_ids, check all interactions with other drugs within the list.
         Output ->
     """
-    drug_ls = ['Hq6TB7KrkqF2ezXXRlrw', 'IdgTjrNPKVftpEnN1fSO',
-               's9D1I7JvKXVA8n8P1BUC', 'fy8pUCzK9uybjP5xJokm',
-               'jL1hQWqqAzzss6jV6dPl', 'lCNKpmGQCWNzB9XI533b',
-               'lYMiJ1e7qN19km0KXvIX', 'tgO3zwJq7AcMaAn1JPay']
+    # drug_ls = ['Hq6TB7KrkqF2ezXXRlrw', 'IdgTjrNPKVftpEnN1fSO',
+    #            's9D1I7JvKXVA8n8P1BUC', 'fy8pUCzK9uybjP5xJokm',
+    #            'jL1hQWqqAzzss6jV6dPl', 'lCNKpmGQCWNzB9XI533b',
+    #            'lYMiJ1e7qN19km0KXvIX', 'tgO3zwJq7AcMaAn1JPay']
+    drug_ls = request.json['cart']
     
     interactions = []
 
@@ -93,7 +94,8 @@ def read():
             drug = drug_ref.document(drug_name).get()
             return jsonify(drug.to_dict()), 200
         else:
-            all_drugs = [doc.to_dict() for doc in drug_ref.stream()]
+            # all_drugs = [doc.to_dict() for doc in drug_ref.stream()]
+            all_drugs = [(doc.id, doc.to_dict()) for doc in drug_ref.stream()]
             return jsonify(all_drugs), 200
     except Exception as e:
         return f"An Error Occurred: {e}"
